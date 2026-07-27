@@ -1,0 +1,3 @@
+# Ingress for Frontend Application (Managed by AGIC)
+# ApiVersion: networking.k8s.io/v1
+# Kind: Ingress

@@ -1,0 +1,3 @@
+# HorizontalPodAutoscaler for Frontend
+# ApiVersion: autoscaling/v2
+# Kind: HorizontalPodAutoscaler

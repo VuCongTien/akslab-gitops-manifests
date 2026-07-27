@@ -1,0 +1,3 @@
+# Deployment for Frontend Application
+# ApiVersion: apps/v1
+# Kind: Deployment
