@@ -1,3 +1,17 @@
-# Service for Frontend Application (ClusterIP)
-# ApiVersion: v1
-# Kind: Service
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: fe-service
+  namespace: frontend-ns
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: frontend
+  
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
