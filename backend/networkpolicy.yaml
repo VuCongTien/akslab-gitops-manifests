@@ -1,3 +1,26 @@
-# NetworkPolicy for Backend (Restricted to Frontend Namespace Ingress Only)
-# ApiVersion: networking.k8s.io/v1
-# Kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: be-network-policy
+  namespace: backend-ns
+
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - from: 
+        - namespaceSelector:
+            matchLabels:
+              name: frontend-ns
+          podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 8080
