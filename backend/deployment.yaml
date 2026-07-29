@@ -23,7 +23,7 @@ spec:
       
       containers:
         - name: backend-containers
-          image:
+          image: acrlab123.azurecr.io/backend:v1.0
           ports:
             - containerPort: 8080
 
