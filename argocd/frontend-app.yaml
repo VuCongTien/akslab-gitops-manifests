@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/VuCongTien/akslab-gitops-manifests.git'
+    targetRevision: main
+    path: frontend
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: frontend-ns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
