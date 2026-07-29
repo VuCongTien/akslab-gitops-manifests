@@ -27,6 +27,10 @@ spec:
           ports:
             - containerPort: 8080
 
+          env:
+            - name: DB_NAME
+              value: "backend"
+
           resources:
             requests:
               cpu: "100m"
