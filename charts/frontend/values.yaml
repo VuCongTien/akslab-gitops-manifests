@@ -1,0 +1,42 @@
+# Default values for frontend.
+
+replicaCount: 2
+
+image:
+  repository: acrlab123.azurecr.io/frontend
+  pullPolicy: IfNotPresent
+  tag: "v1.0"
+
+env:
+  backendUrl: "http://be-service.backend-ns.svc.cluster.local:8080"
+
+service:
+  name: fe-service
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+
+autoscaling:
+  enabled: true
+  name: fe-hpa
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: true
+  name: fe-ingress
+  className: azure-application-gateway
+  annotations:
+    kubernetes.io/ingress.class: "azure/application-gateway"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+  path: /
+  pathType: Prefix
