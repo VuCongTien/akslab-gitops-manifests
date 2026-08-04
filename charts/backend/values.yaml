@@ -22,7 +22,7 @@ secretProviderClass:
   usePodIdentity: "false"
   useVMManagedIdentity: "false"
   clientId: "71ada0f8-3ea7-41fd-ae42-ce6209a2dfe4"
-  keyvaultName: "kvlab123"
+  keyvaultName: "tienvc123-kv"
   tenantId: "f8aee337-aae4-4a12-8254-683dc276c749"
   secrets:
     - db-host
