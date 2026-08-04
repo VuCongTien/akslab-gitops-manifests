@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/VuCongTien/akslab-gitops-manifests.git'
     targetRevision: main
-    path: frontend
+    path: charts/frontend
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: frontend-ns

@@ -1,0 +1,61 @@
+# Default values for backend.
+
+replicaCount: 2
+
+image:
+  repository: acrlab123.azurecr.io/backend
+  pullPolicy: IfNotPresent
+  tag: "v1.0"
+
+serviceAccount:
+  create: true
+  name: be-sa
+  clientId: "71ada0f8-3ea7-41fd-ae42-ce6209a2dfe4"
+
+workloadIdentity:
+  enabled: true
+
+secretProviderClass:
+  enabled: true
+  name: be-keyvault-secrets
+  provider: azure
+  usePodIdentity: "false"
+  useVMManagedIdentity: "false"
+  clientId: "71ada0f8-3ea7-41fd-ae42-ce6209a2dfe4"
+  keyvaultName: "kvlab123"
+  tenantId: "f8aee337-aae4-4a12-8254-683dc276c749"
+  secrets:
+    - db-host
+    - db-username
+    - db-password
+  mountPath: "/mnt/secrets-store"
+
+env:
+  dbName: "backend"
+
+service:
+  name: be-service
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+
+autoscaling:
+  enabled: true
+  name: be-hpa
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+networkPolicy:
+  enabled: true
+  name: be-network-policy
+  allowedNamespace: frontend-ns
+  allowedPodApp: frontend
