@@ -3,7 +3,7 @@
 replicaCount: 2
 
 image:
-  repository: acrlab123.azurecr.io/backend
+  repository: tienvc23.azurecr.io/backend
   pullPolicy: IfNotPresent
   tag: "v1.0"
 
