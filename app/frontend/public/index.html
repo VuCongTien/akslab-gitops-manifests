@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Azure AKS CRUD Management Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(30, 41, 59, 0.75);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-red: #f87171;
+      --accent-yellow: #fbbf24;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(74, 222, 128, 0.12);
+      color: var(--accent-green);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    /* CRUD Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 130px;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .form-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .btn {
+      padding: 11px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-edit {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--accent-yellow);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-delete {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--accent-red);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-edit:hover { background: rgba(251, 191, 36, 0.3); }
+    .btn-delete:hover { background: rgba(248, 113, 113, 0.3); }
+
+    /* Data Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.95rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-category {
+      background: rgba(192, 132, 252, 0.15);
+      color: var(--accent-purple);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 8px;
+    }
+
+    footer {
+      margin-top: 40px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Azure AKS Enterprise CRUD Management Platform</h1>
+    <p>Full-Stack Real-World Application (Frontend ➔ Backend API ➔ PostgreSQL Private DB via KeyVault CSI)</p>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- System Architecture Health Bar -->
+    <div class="glass-card">
+      <div class="card-header" style="margin-bottom:0; border:none; padding:0;">
+        <div>
+          <span style="color: var(--text-muted); font-size: 0.9rem;">Cluster Status: </span>
+          <span id="backendStatus" style="font-weight:600; margin-left: 8px;">Connecting...</span>
+        </div>
+        <div id="healthBadge" class="status-badge">
+          <span class="status-dot"></span> Checking Status...
+        </div>
+      </div>
+    </div>
+
+    <!-- Create / Edit Product Form -->
+    <div class="glass-card">
+      <div class="card-header">
+        <span class="card-title" id="formTitle">➕ Add New Inventory Item</span>
+        <span style="color: var(--text-muted); font-size:0.85rem;" id="editingNotice"></span>
+      </div>
+      
+      <form id="crudForm" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="productId" value="">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name">Product Name *</label>
+            <input type="text" id="name" class="form-input" placeholder="e.g. AKS Worker Node" required>
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" class="form-input" placeholder="Infrastructure, DevOps...">
+          </div>
+          <div class="form-group">
+            <label for="price">Price ($) *</label>
+            <input type="number" step="0.01" id="price" class="form-input" placeholder="99.99" required>
+          </div>
+          <div class="form-group">
+            <label for="stock">Stock Quantity</label>
+            <input type="number" id="stock" class="form-input" placeholder="10" value="10" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="btnSubmit">
+            <span id="btnText">Add Item</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Inventory Data Table -->
+    <div class="glass-card">
+      <div class="card-header">
+        <span class="card-title">📦 Real-time PostgreSQL Database Records</span>
+        <span style="color: var(--text-muted); font-size: 0.85rem;" id="itemCount">0 Records</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody">
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted);">Loading PostgreSQL records...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <footer>
+    Azure AKS GitOps Lab — Managed Identity, Private Link, Workload Identity & Secrets Store CSI Driver
+  </footer>
+
+  <script>
+    const API_BASE = '/api/proxy';
+
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        const data = await res.json();
+        if (data.status === 'UP') {
+          document.getElementById('healthBadge').innerHTML = '<span class="status-dot"></span> HEALTHY';
+          document.getElementById('backendStatus').innerText = `Connected to PostgreSQL (${data.database})`;
+          document.getElementById('backendStatus').style.color = '#4ade80';
+        } else {
+          document.getElementById('healthBadge').innerHTML = '<span class="status-dot" style="background:#f87171; box-shadow:0 0 8px #f87171"></span> DEGRADED';
+          document.getElementById('backendStatus').innerText = 'DB Disconnected';
+          document.getElementById('backendStatus').style.color = '#f87171';
+        }
+      } catch (err) {
+        document.getElementById('healthBadge').innerHTML = '<span class="status-dot" style="background:#f87171; box-shadow:0 0 8px #f87171"></span> OFFLINE';
+        document.getElementById('backendStatus').innerText = 'Backend Unreachable';
+        document.getElementById('backendStatus').style.color = '#f87171';
+      }
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(`${API_BASE}/products`);
+        const result = await res.json();
+
+        if (result.success && result.data) {
+          document.getElementById('itemCount').innerText = `${result.data.length} Records`;
+          
+          if (result.data.length === 0) {
+            document.getElementById('productsTableBody').innerHTML = `
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted);">No inventory records found in PostgreSQL. Add one above!</td>
+              </tr>`;
+            return;
+          }
+
+          const rowsHtml = result.data.map(item => `
+            <tr>
+              <td>#${item.id}</td>
+              <td style="font-weight: 600;">${item.name}</td>
+              <td><span class="badge-category">${item.category || 'General'}</span></td>
+              <td style="color: var(--accent-green); font-weight:600;">$${parseFloat(item.price).toFixed(2)}</td>
+              <td>${item.stock} units</td>
+              <td class="actions-cell">
+                <button class="btn btn-edit" onclick="editProduct(${item.id}, '${escapeHtml(item.name)}', '${escapeHtml(item.category || '')}', ${item.price}, ${item.stock})">✏️ Edit</button>
+                <button class="btn btn-delete" onclick="deleteProduct(${item.id})">🗑️ Delete</button>
+              </td>
+            </tr>
+          `).join('');
+
+          document.getElementById('productsTableBody').innerHTML = rowsHtml;
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err);
+      }
+    }
+
+    async function handleFormSubmit(event) {
+      event.preventDefault();
+
+      const id = document.getElementById('productId').value;
+      const name = document.getElementById('name').value;
+      const category = document.getElementById('category').value;
+      const price = parseFloat(document.getElementById('price').value);
+      const stock = parseInt(document.getElementById('stock').value);
+
+      const payload = { name, category, price, stock };
+
+      try {
+        let res;
+        if (id) {
+          // UPDATE (PUT)
+          res = await fetch(`${API_BASE}/products/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          // CREATE (POST)
+          res = await fetch(`${API_BASE}/products`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          resetForm();
+          await loadProducts();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Failed to save product: ' + err.message);
+      }
+    }
+
+    function editProduct(id, name, category, price, stock) {
+      document.getElementById('productId').value = id;
+      document.getElementById('name').value = name;
+      document.getElementById('category').value = category;
+      document.getElementById('price').value = price;
+      document.getElementById('stock').value = stock;
+
+      document.getElementById('formTitle').innerText = `✏️ Edit Product #${id}`;
+      document.getElementById('btnText').innerText = 'Update Item';
+      document.getElementById('editingNotice').innerHTML = `<button type="button" class="btn btn-delete" onclick="resetForm()" style="padding:2px 8px;">Cancel Edit</button>`;
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm(`Are you sure you want to delete Product #${id}?`)) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          await loadProducts();
+        } else {
+          alert('Error deleting product: ' + data.error);
+        }
+      } catch (err) {
+        alert('Failed to delete product: ' + err.message);
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('crudForm').reset();
+      document.getElementById('productId').value = '';
+      document.getElementById('formTitle').innerText = '➕ Add New Inventory Item';
+      document.getElementById('btnText').innerText = 'Add Item';
+      document.getElementById('editingNotice').innerHTML = '';
+    }
+
+    function escapeHtml(text) {
+      return text ? text.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+    }
+
+    // Initial Load
+    checkHealth();
+    loadProducts();
+    setInterval(checkHealth, 10000); // Auto ping status every 10s
+  </script>
+</body>
+</html>
