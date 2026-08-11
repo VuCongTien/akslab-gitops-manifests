@@ -46,3 +46,28 @@ variable "aks_name" {
   type        = string
   default     = "tienvc123aks"
 }
+
+variable "postgresql_name" {
+  description = "Azure PostgreSQL name"
+  type        = string
+  default     = "tienvc123postgresql"
+}
+
+variable "postgresql_admin_username" {
+  description = "Azure PostgreSQL admin username"
+  type        = string
+  default     = "admin"
+}
+
+variable "postgresql_admin_password" {
+  description = "Azure PostgreSQL admin password"
+  type        = string
+  default     = "Password123!"
+}
+
+variable "database_name" {
+  description = "Azure database name"
+  type        = string
+  default     = "backend"
+}
+
